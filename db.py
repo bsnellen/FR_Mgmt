@@ -151,3 +151,112 @@ def delete_radusergroup_membership(username, groupname):
     finally:
         if conn:
             conn.close()
+
+
+def get_groups():
+    """Fetch all groups from radgroupreply table."""
+    conn = get_db_connection()
+    if not conn:
+        return []
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT groupname, attribute, op, value FROM radgroupreply ORDER BY groupname")
+        groups = {}
+        for row in cursor.fetchall():
+            groupname = row[0]
+            if groupname not in groups:
+                groups[groupname] = {"groupname": groupname, "attributes": []}
+            groups[groupname]["attributes"].append({
+                "attribute": row[1],
+                "op": row[2],
+                "value": row[3]
+            })
+        return list(groups.values())
+    except mariadb.Error as e:
+        print(f"Error fetching groups: {e}", file=sys.stderr)
+        return []
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_group(groupname):
+    """Fetch a specific group from radgroupreply table."""
+    conn = get_db_connection()
+    if not conn:
+        return None
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT attribute, op, value FROM radgroupreply WHERE groupname = ?", (groupname,))
+        attributes = [{"attribute": row[0], "op": row[1], "value": row[2]} for row in cursor.fetchall()]
+        return {"groupname": groupname, "attributes": attributes}
+    except mariadb.Error as e:
+        print(f"Error fetching group: {e}", file=sys.stderr)
+        return None
+    finally:
+        if conn:
+            conn.close()
+
+
+def update_group_attribute(groupname, attribute, op, value, old_attribute=None):
+    """Update or insert a group attribute in radgroupreply table."""
+    conn = get_db_connection()
+    if not conn:
+        return False
+    try:
+        cursor = conn.cursor()
+        if old_attribute:
+            cursor.execute(
+                "UPDATE radgroupreply SET attribute = ?, op = ?, value = ? "
+                "WHERE groupname = ? AND attribute = ?",
+                (attribute, op, value, groupname, old_attribute)
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO radgroupreply (groupname, attribute, op, value) VALUES (?, ?, ?, ?)",
+                (groupname, attribute, op, value)
+            )
+        conn.commit()
+        return True
+    except mariadb.Error as e:
+        print(f"Error updating group attribute: {e}", file=sys.stderr)
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+def delete_group_attribute(groupname, attribute):
+    """Delete a group attribute from radgroupreply table."""
+    conn = get_db_connection()
+    if not conn:
+        return False
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM radgroupreply WHERE groupname = ? AND attribute = ?", (groupname, attribute))
+        conn.commit()
+        return True
+    except mariadb.Error as e:
+        print(f"Error deleting group attribute: {e}", file=sys.stderr)
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+def delete_group(groupname):
+    """Delete all attributes for a group from radgroupreply table."""
+    conn = get_db_connection()
+    if not conn:
+        return False
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM radgroupreply WHERE groupname = ?", (groupname,))
+        conn.commit()
+        return True
+    except mariadb.Error as e:
+        print(f"Error deleting group: {e}", file=sys.stderr)
+        return False
+    finally:
+        if conn:
+            conn.close()

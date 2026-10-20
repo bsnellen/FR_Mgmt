@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from db import (
     get_radcheck_users, update_radcheck_user, delete_radcheck_user,
-    add_radusergroup_membership, delete_radusergroup_membership
+    add_radusergroup_membership, delete_radusergroup_membership,
+    get_groups, get_group, update_group_attribute, delete_group_attribute, delete_group
 )
 
 app = Flask(__name__)
@@ -52,6 +53,64 @@ def delete_group():
     if username and groupname:
         delete_radusergroup_membership(username, groupname)
     return redirect(url_for("index"))
+
+
+@app.route("/groups")
+def groups():
+    groups = get_groups()
+    return render_template("groups.html", groups=groups)
+
+
+@app.route("/groups/create", methods=["POST"])
+def create_group():
+    groupname = request.form.get("groupname")
+    attribute = request.form.get("attribute")
+    op = request.form.get("op")
+    value = request.form.get("value")
+    if groupname and attribute and op and value:
+        update_group_attribute(groupname, attribute, op, value)
+    return redirect(url_for("groups"))
+
+
+@app.route("/groups/update", methods=["POST"])
+def update_group():
+    groupname = request.form.get("groupname")
+    attribute = request.form.get("attribute")
+    op = request.form.get("op")
+    value = request.form.get("value")
+    old_groupname = request.form.get("old_groupname")
+    old_attribute = request.form.get("old_attribute")
+    if groupname and attribute and op and value:
+        update_group_attribute(groupname, attribute, op, value, old_attribute)
+    return redirect(url_for("groups"))
+
+
+@app.route("/groups/add_attr", methods=["POST"])
+def add_group_attr():
+    groupname = request.form.get("groupname")
+    attribute = request.form.get("attribute")
+    op = request.form.get("op")
+    value = request.form.get("value")
+    if groupname and attribute and op and value:
+        update_group_attribute(groupname, attribute, op, value)
+    return redirect(url_for("groups"))
+
+
+@app.route("/groups/delete_attr", methods=["POST"])
+def delete_group_attr():
+    groupname = request.form.get("groupname")
+    attribute = request.form.get("attribute")
+    if groupname and attribute:
+        delete_group_attribute(groupname, attribute)
+    return redirect(url_for("groups"))
+
+
+@app.route("/groups/delete", methods=["POST"])
+def delete_group_entry():
+    groupname = request.form.get("groupname")
+    if groupname:
+        delete_group(groupname)
+    return redirect(url_for("groups"))
 
 
 if __name__ == "__main__":

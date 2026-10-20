@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Management</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .form-row { margin: 5px 0; }
+        .form-row input, .form-row select { padding: 5px; }
+        .edit-form { background: #fff; padding: 10px; border: 1px solid #ddd; margin: 10px 0; display: none; }
+        .edit-form.active { display: block; }
+        .group-section { margin-bottom: 20px; border: 1px solid #eee; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Group Management</h1>
+    
+    <p><a href="/">Back to Users</a></p>
+    
+    <h2>Create New Group</h2>
+    <form method="POST" action="/groups/create">
+        <div class="form-row">
+            <input type="text" name="groupname" placeholder="Group Name" required>
+            <input type="text" name="attribute" placeholder="Attribute" required>
+            <select name="op" required>
+                <option value="=">=</option>
+                <option value=":=">:=</option>
+                <option value="==">==</option>
+            </select>
+            <input type="text" name="value" placeholder="Value" required>
+            <button type="submit">Create</button>
+        </div>
+    </form>
+
+    <div id="editForm" class="edit-form">
+        <h3>Edit Group Attribute</h3>
+        <form method="POST" action="/groups/update">
+            <input type="hidden" name="old_groupname" id="old_groupname">
+            <input type="hidden" name="old_attribute" id="old_attribute">
+            <div class="form-row">
+                <input type="text" name="groupname" id="edit_groupname" placeholder="Group Name" required>
+                <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
+                <select name="op" id="edit_op" required>
+                    <option value="=">=</option>
+                    <option value=":=">:=</option>
+                    <option value="==">==</option>
+                </select>
+                <input type="text" name="value" id="edit_value" placeholder="Value" required>
+                <button type="submit">Update</button>
+                <button type="button" onclick="hideEditForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <h2>Groups</h2>
+    {% for group in groups %}
+    <div class="group-section">
+        <h3>{{ group.groupname }}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Op</th>
+                    <th>Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attr in group.attributes %}
+                <tr>
+                    <td>{{ attr.attribute }}</td>
+                    <td>{{ attr.op }}</td>
+                    <td>{{ attr.value }}</td>
+                    <td>
+                        <button class="edit-btn" 
+                                data-groupname="{{ group.groupname }}"
+                                data-attribute="{{ attr.attribute }}"
+                                data-op="{{ attr.op }}"
+                                data-value="{{ attr.value }}">
+                            Edit
+                        </button>
+                        <form method="POST" action="/groups/delete_attr" style="display: inline;">
+                            <input type="hidden" name="groupname" value="{{ group.groupname }}">
+                            <input type="hidden" name="attribute" value="{{ attr.attribute }}">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <form method="POST" action="/groups/add_attr" style="margin-top: 10px;">
+            <input type="hidden" name="groupname" value="{{ group.groupname }}">
+            <input type="text" name="attribute" placeholder="Attribute" required>
+            <select name="op" required>
+                <option value="=">=</option>
+                <option value=":=">:=</option>
+                <option value="==">==</option>
+            </select>
+            <input type="text" name="value" placeholder="Value" required>
+            <button type="submit">Add Attribute</button>
+        </form>
+        <form method="POST" action="/groups/delete" style="margin-top: 10px;">
+            <input type="hidden" name="groupname" value="{{ group.groupname }}">
+            <button type="submit">Delete Group</button>
+        </form>
+    </div>
+    {% endfor %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.getElementById('old_groupname').value = this.dataset.groupname;
+                    document.getElementById('old_attribute').value = this.dataset.attribute;
+                    document.getElementById('edit_groupname').value = this.dataset.groupname;
+                    document.getElementById('edit_attribute').value = this.dataset.attribute;
+                    document.getElementById('edit_op').value = this.dataset.op;
+                    document.getElementById('edit_value').value = this.dataset.value;
+                    document.getElementById('editForm').classList.add('active');
+                });
+            });
+        });
+        function hideEditForm() {
+            document.getElementById('editForm').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
