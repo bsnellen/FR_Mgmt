@@ -85,7 +85,7 @@
                             data-attribute="{{ user.checks[0].attribute if user.checks else '' }}"
                             data-op="{{ user.checks[0].op if user.checks else '' }}"
                             data-value="{{ user.checks[0].value if user.checks else '' }}"
-                            data-groups='{% for g in user.groups %}{{"groupname":"{{ g.groupname }}","priority":{{ g.priority }}}}{% if not loop.last %},{% endif %}{% endfor %}'>
+                            data-groups='{{ user.groups | tojson }}'>
                         Edit
                     </button>
                     <form method="POST" action="/delete" style="display: inline;">
@@ -110,7 +110,6 @@
                     document.getElementById('edit_op').value = this.dataset.op;
                     document.getElementById('edit_value').value = this.dataset.value;
                     
-                    // Show group editing in the edit form
                     const groups = JSON.parse(this.dataset.groups || '[]');
                     const editGroupsDiv = document.getElementById('editGroups');
                     editGroupsDiv.innerHTML = '<h4>Groups</h4>';
