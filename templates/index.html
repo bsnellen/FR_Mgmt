@@ -72,7 +72,7 @@
                 <td>{{ user.op }}</td>
                 <td>{{ user.value }}</td>
                 <td>
-                    <button onclick="showEditForm('{{ user.username | tojson }}', '{{ user.attribute | tojson }}', '{{ user.op | tojson }}', '{{ user.value | tojson }}')">Edit</button>
+                    <button class="edit-btn" data-username="{{ user.username }}" data-attribute="{{ user.attribute }}" data-op="{{ user.op }}" data-value="{{ user.value }}">Edit</button>
                     <form method="POST" action="/delete" style="display: inline;">
                         <input type="hidden" name="username" value="{{ user.username }}">
                         <input type="hidden" name="attribute" value="{{ user.attribute }}">
@@ -85,15 +85,19 @@
     </table>
 
     <script>
-        function showEditForm(username, attribute, op, value) {
-            document.getElementById('old_username').value = username;
-            document.getElementById('old_attribute').value = attribute;
-            document.getElementById('edit_username').value = username;
-            document.getElementById('edit_attribute').value = attribute;
-            document.getElementById('edit_op').value = op;
-            document.getElementById('edit_value').value = value;
-            document.getElementById('editForm').classList.add('active');
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.getElementById('old_username').value = this.dataset.username;
+                    document.getElementById('old_attribute').value = this.dataset.attribute;
+                    document.getElementById('edit_username').value = this.dataset.username;
+                    document.getElementById('edit_attribute').value = this.dataset.attribute;
+                    document.getElementById('edit_op').value = this.dataset.op;
+                    document.getElementById('edit_value').value = this.dataset.value;
+                    document.getElementById('editForm').classList.add('active');
+                });
+            });
+        });
         function hideEditForm() {
             document.getElementById('editForm').classList.remove('active');
         }
