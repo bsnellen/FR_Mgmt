@@ -102,6 +102,8 @@
     </table>
 
     <script>
+        const allGroups = {{ groups | tojson }};
+        
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.edit-btn').forEach(button => {
                 button.addEventListener('click', function() {
@@ -120,9 +122,22 @@
                     groupForm.method = 'POST';
                     groupForm.action = '/add_group';
                     groupForm.style.margin = '5px 0';
+                    
+                    const groupSelect = document.createElement('select');
+                    groupSelect.name = 'groupname';
+                    groupSelect.required = true;
+                    allGroups.forEach(g => {
+                        const option = document.createElement('option');
+                        option.value = g.groupname;
+                        option.textContent = g.groupname;
+                        groupSelect.appendChild(option);
+                    });
+                    
                     groupForm.innerHTML = `
                         <input type="hidden" name="username" value="${this.dataset.username}">
-                        <input type="text" name="groupname" placeholder="Group Name" required>
+                    `;
+                    groupForm.appendChild(groupSelect);
+                    groupForm.innerHTML += `
                         <input type="number" name="priority" placeholder="Priority" value="0">
                         <button type="submit">Add Group</button>
                     `;

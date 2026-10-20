@@ -11,7 +11,8 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     users = get_radcheck_users()
-    return render_template("index.html", users=users)
+    groups = get_groups()
+    return render_template("index.html", users=users, groups=groups)
 
 
 @app.route("/update", methods=["POST"])
