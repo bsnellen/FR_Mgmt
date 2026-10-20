@@ -33,37 +33,6 @@
         </div>
     </form>
 
-    <h2>Users</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Attribute</th>
-                <th>Op</th>
-                <th>Value</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.attribute }}</td>
-                <td>{{ user.op }}</td>
-                <td>{{ user.value }}</td>
-                <td>
-                    <button onclick="showEditForm('{{ user.username }}', '{{ user.attribute }}', '{{ user.op }}', '{{ user.value }}')">Edit</button>
-                    <form method="POST" action="/delete" style="display: inline;">
-                        <input type="hidden" name="username" value="{{ user.username }}">
-                        <input type="hidden" name="attribute" value="{{ user.attribute }}">
-                        <button type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
     <div id="editForm" class="edit-form">
         <h3>Edit User</h3>
         <form method="POST" action="/update">
@@ -83,6 +52,37 @@
             </div>
         </form>
     </div>
+
+    <h2>Users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Attribute</th>
+                <th>Op</th>
+                <th>Value</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.attribute }}</td>
+                <td>{{ user.op }}</td>
+                <td>{{ user.value }}</td>
+                <td>
+                    <button onclick="showEditForm('{{ user.username | e("js") }}', '{{ user.attribute | e("js") }}', '{{ user.op | e("js") }}', '{{ user.value | e("js") }}')">Edit</button>
+                    <form method="POST" action="/delete" style="display: inline;">
+                        <input type="hidden" name="username" value="{{ user.username }}">
+                        <input type="hidden" name="attribute" value="{{ user.attribute }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <script>
         function showEditForm(username, attribute, op, value) {
