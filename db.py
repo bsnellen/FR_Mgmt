@@ -17,3 +17,21 @@ def get_db_connection():
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB: {e}", file=sys.stderr)
         return None
+
+
+def get_radcheck_users():
+    """Fetch all users from the radius radcheck table."""
+    conn = get_db_connection()
+    if not conn:
+        return []
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT username FROM radcheck")
+        users = [row[0] for row in cursor.fetchall()]
+        return users
+    except mariadb.Error as e:
+        print(f"Error fetching users: {e}", file=sys.stderr)
+        return []
+    finally:
+        if conn:
+            conn.close()
