@@ -13,6 +13,9 @@
         .form-row input, .form-row select { padding: 5px; }
         .edit-form { background: #fff; padding: 10px; border: 1px solid #ddd; margin: 10px 0; display: none; }
         .edit-form.active { display: block; }
+        .user-section { margin-bottom: 20px; border: 1px solid #eee; padding: 10px; }
+        .group-form { margin: 10px 0; padding: 10px; background: #f9f9f9; }
+        .group-list { margin-left: 20px; }
     </style>
 </head>
 <body>
@@ -54,35 +57,66 @@
     </div>
 
     <h2>Users</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Attribute</th>
-                <th>Op</th>
-                <th>Value</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.attribute }}</td>
-                <td>{{ user.op }}</td>
-                <td>{{ user.value }}</td>
-                <td>
-                    <button class="edit-btn" data-username="{{ user.username }}" data-attribute="{{ user.attribute }}" data-op="{{ user.op }}" data-value="{{ user.value }}">Edit</button>
-                    <form method="POST" action="/delete" style="display: inline;">
-                        <input type="hidden" name="username" value="{{ user.username }}">
-                        <input type="hidden" name="attribute" value="{{ user.attribute }}">
-                        <button type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
+    {% for user in users %}
+    <div class="user-section">
+        <h3>{{ user.username }}</h3>
+        
+        <h4>Checks</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Op</th>
+                    <th>Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for check in user.checks %}
+                <tr>
+                    <td>{{ check.attribute }}</td>
+                    <td>{{ check.op }}</td>
+                    <td>{{ check.value }}</td>
+                    <td>
+                        <button class="edit-btn" 
+                                data-username="{{ user.username }}" 
+                                data-attribute="{{ check.attribute }}" 
+                                data-op="{{ check.op }}" 
+                                data-value="{{ check.value }}">Edit</button>
+                        <form method="POST" action="/delete" style="display: inline;">
+                            <input type="hidden" name="username" value="{{ user.username }}">
+                            <input type="hidden" name="attribute" value="{{ check.attribute }}">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Group Memberships</h4>
+        <div class="group-form">
+            <form method="POST" action="/add_group">
+                <input type="hidden" name="username" value="{{ user.username }}">
+                <input type="text" name="groupname" placeholder="Group Name" required>
+                <input type="number" name="priority" placeholder="Priority" value="0">
+                <button type="submit">Add Group</button>
+            </form>
+        </div>
+        <div class="group-list">
+            {% for group in user.groups %}
+            <div>
+                {{ group.groupname }} (Priority: {{ group.priority }})
+                <form method="POST" action="/delete_group" style="display: inline;">
+                    <input type="hidden" name="username" value="{{ user.username }}">
+                    <input type="hidden" name="groupname" value="{{ group.groupname }}">
+                    <button type="submit">Remove</button>
+                </form>
+            </div>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    </div>
+    {% endfor %}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
