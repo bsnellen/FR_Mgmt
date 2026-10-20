@@ -72,7 +72,7 @@
                 <td>{{ user.op }}</td>
                 <td>{{ user.value }}</td>
                 <td>
-                    <button onclick="showEditForm('{{ user.username | e("js") }}', '{{ user.attribute | e("js") }}', '{{ user.op | e("js") }}', '{{ user.value | e("js") }}')">Edit</button>
+                    <button onclick="showEditForm('{{ user.username | tojson }}', '{{ user.attribute | tojson }}', '{{ user.op | tojson }}', '{{ user.value | tojson }}')">Edit</button>
                     <form method="POST" action="/delete" style="display: inline;">
                         <input type="hidden" name="username" value="{{ user.username }}">
                         <input type="hidden" name="attribute" value="{{ user.attribute }}">
