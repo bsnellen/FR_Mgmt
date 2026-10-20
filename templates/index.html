@@ -10,13 +10,15 @@
         th { background-color: #f2f2f2; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         .form-row { margin: 5px 0; }
-        .form-row input { padding: 5px; }
+        .form-row input, .form-row select { padding: 5px; }
+        .edit-form { background: #fff; padding: 10px; border: 1px solid #ddd; margin: 10px 0; display: none; }
+        .edit-form.active { display: block; }
     </style>
 </head>
 <body>
     <h1>Device Management</h1>
     
-    <h2>Add/Edit User</h2>
+    <h2>Add User</h2>
     <form method="POST" action="/update">
         <div class="form-row">
             <input type="text" name="username" placeholder="Username" required>
@@ -50,6 +52,7 @@
                 <td>{{ user.op }}</td>
                 <td>{{ user.value }}</td>
                 <td>
+                    <button onclick="showEditForm('{{ user.username }}', '{{ user.attribute }}', '{{ user.op }}', '{{ user.value }}')">Edit</button>
                     <form method="POST" action="/delete" style="display: inline;">
                         <input type="hidden" name="username" value="{{ user.username }}">
                         <input type="hidden" name="attribute" value="{{ user.attribute }}">
@@ -60,5 +63,40 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div id="editForm" class="edit-form">
+        <h3>Edit User</h3>
+        <form method="POST" action="/update">
+            <input type="hidden" name="old_username" id="old_username">
+            <input type="hidden" name="old_attribute" id="old_attribute">
+            <div class="form-row">
+                <input type="text" name="username" id="edit_username" placeholder="Username" required>
+                <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
+                <select name="op" id="edit_op" required>
+                    <option value="=">=</option>
+                    <option value=":=">:=</option>
+                    <option value="==">==</option>
+                </select>
+                <input type="text" name="value" id="edit_value" placeholder="Value" required>
+                <button type="submit">Update</button>
+                <button type="button" onclick="hideEditForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function showEditForm(username, attribute, op, value) {
+            document.getElementById('old_username').value = username;
+            document.getElementById('old_attribute').value = attribute;
+            document.getElementById('edit_username').value = username;
+            document.getElementById('edit_attribute').value = attribute;
+            document.getElementById('edit_op').value = op;
+            document.getElementById('edit_value').value = value;
+            document.getElementById('editForm').classList.add('active');
+        }
+        function hideEditForm() {
+            document.getElementById('editForm').classList.remove('active');
+        }
+    </script>
 </body>
 </html>

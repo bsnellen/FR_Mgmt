@@ -16,8 +16,10 @@ def update():
     attribute = request.form.get("attribute")
     op = request.form.get("op")
     value = request.form.get("value")
+    old_username = request.form.get("old_username")
+    old_attribute = request.form.get("old_attribute")
     if username and attribute and op and value:
-        update_radcheck_user(username, attribute, op, value)
+        update_radcheck_user(username, attribute, op, value, old_username, old_attribute)
     return redirect(url_for("index"))
 
 

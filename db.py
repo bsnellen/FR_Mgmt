@@ -37,18 +37,25 @@ def get_radcheck_users():
             conn.close()
 
 
-def update_radcheck_user(username, attribute, op, value):
+def update_radcheck_user(username, attribute, op, value, old_username=None, old_attribute=None):
     """Update or insert a user entry in radcheck table."""
     conn = get_db_connection()
     if not conn:
         return False
     try:
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO radcheck (username, attribute, op, value) VALUES (?, ?, ?, ?) "
-            "ON DUPLICATE KEY UPDATE attribute = ?, op = ?, value = ?",
-            (username, attribute, op, value, attribute, op, value)
-        )
+        if old_username and old_attribute:
+            cursor.execute(
+                "UPDATE radcheck SET username = ?, attribute = ?, op = ?, value = ? "
+                "WHERE username = ? AND attribute = ?",
+                (username, attribute, op, value, old_username, old_attribute)
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO radcheck (username, attribute, op, value) VALUES (?, ?, ?, ?) "
+                "ON DUPLICATE KEY UPDATE attribute = ?, op = ?, value = ?",
+                (username, attribute, op, value, attribute, op, value)
+            )
         conn.commit()
         return True
     except mariadb.Error as e:
