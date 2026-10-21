@@ -206,6 +206,7 @@
                 <div class="form-row">
                     <input type="text" name="username" placeholder="Username" required>
                     <input type="text" name="attribute" placeholder="Attribute" required>
+                    <input type="text" name="description" placeholder="Description">
                     <select name="op" required>
                         <option value="=">=</option>
                         <option value=":=">:=</option>
@@ -226,6 +227,7 @@
                 <div class="form-row">
                     <input type="text" name="username" id="edit_username" placeholder="Username" required>
                     <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
+                    <input type="text" name="description" id="edit_description" placeholder="Description">
                     <select name="op" id="edit_op" required>
                         <option value="=">=</option>
                         <option value=":=">:=</option>
@@ -275,6 +277,7 @@
                             <button class="btn btn-secondary btn-sm edit-btn" 
                                     data-username="{{ user.username }}"
                                     data-attribute="{{ user.checks[0].attribute if user.checks else '' }}"
+                                    data-description="{{ user.checks[0].description if user.checks else '' }}"
                                     data-op="{{ user.checks[0].op if user.checks else '' }}"
                                     data-value="{{ user.checks[0].value if user.checks else '' }}"
                                     data-groups='{{ user.groups | tojson }}'>
@@ -316,6 +319,7 @@
                     document.getElementById('old_attribute').value = this.dataset.attribute;
                     document.getElementById('edit_username').value = this.dataset.username;
                     document.getElementById('edit_attribute').value = this.dataset.attribute;
+                    document.getElementById('edit_description').value = this.dataset.description;
                     document.getElementById('edit_op').value = this.dataset.op;
                     document.getElementById('edit_value').value = this.dataset.value;
                     

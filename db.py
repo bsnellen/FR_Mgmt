@@ -51,7 +51,7 @@ def get_radcheck_users():
             conn.close()
 
 
-def update_radcheck_user(username, attribute, op, value, old_username=None, old_attribute=None):
+def update_radcheck_user(username, attribute, op, value, old_username=None, old_attribute=None, description=None):
     """Update or insert a user entry in radcheck table."""
     conn = get_db_connection()
     if not conn:
@@ -60,15 +60,15 @@ def update_radcheck_user(username, attribute, op, value, old_username=None, old_
         cursor = conn.cursor()
         if old_username and old_attribute:
             cursor.execute(
-                "UPDATE radcheck SET username = ?, attribute = ?, op = ?, value = ? "
+                "UPDATE radcheck SET username = ?, attribute = ?, op = ?, value = ?, description = ? "
                 "WHERE username = ? AND attribute = ?",
-                (username, attribute, op, value, old_username, old_attribute)
+                (username, attribute, op, value, description, old_username, old_attribute)
             )
         else:
             cursor.execute(
-                "INSERT INTO radcheck (username, attribute, op, value) VALUES (?, ?, ?, ?) "
-                "ON DUPLICATE KEY UPDATE attribute = ?, op = ?, value = ?",
-                (username, attribute, op, value, attribute, op, value)
+                "INSERT INTO radcheck (username, attribute, op, value, description) VALUES (?, ?, ?, ?, ?) "
+                "ON DUPLICATE KEY UPDATE attribute = ?, op = ?, value = ?, description = ?",
+                (username, attribute, op, value, description, attribute, op, value, description)
             )
         conn.commit()
         return True
