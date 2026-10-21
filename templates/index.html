@@ -177,6 +177,19 @@
             display: none;
         }
         .overlay.active { display: block; }
+        
+        .value-hidden { color: transparent; user-select: none; }
+        .value-hidden::after { content: '••••••••'; color: var(--text-light); }
+        .unhide-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 4px;
+            margin-left: 4px;
+        }
+        .unhide-btn:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -247,7 +260,10 @@
                         <td>{{ user.username }}</td>
                         <td>{{ user.checks[0].attribute if user.checks else '' }}</td>
                         <td>{{ user.checks[0].op if user.checks else '' }}</td>
-                        <td>{{ user.checks[0].value if user.checks else '' }}</td>
+                        <td>
+                            <span class="value-hidden" data-value="{{ user.checks[0].value if user.checks else '' }}"></span>
+                            <button class="unhide-btn" onclick="toggleValue(this)">Show</button>
+                        </td>
                         <td>
                             {% for group in user.groups %}
                             <span class="group-badge">{{ group.groupname }}</span>
@@ -277,6 +293,19 @@
 
     <script>
         const allGroups = {{ groups | tojson }};
+        
+        function toggleValue(button) {
+            const hiddenSpan = button.previousElementSibling;
+            if (hiddenSpan.classList.contains('value-hidden')) {
+                hiddenSpan.classList.remove('value-hidden');
+                hiddenSpan.textContent = hiddenSpan.dataset.value;
+                button.textContent = 'Hide';
+            } else {
+                hiddenSpan.classList.add('value-hidden');
+                hiddenSpan.textContent = '';
+                button.textContent = 'Show';
+            }
+        }
         
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.edit-btn').forEach(button => {
