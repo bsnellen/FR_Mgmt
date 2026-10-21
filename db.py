@@ -1,6 +1,10 @@
 import mariadb
 import sys
-from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+import requests
+from config import (
+    DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME,
+    OPNSENSE_HOST, OPNSENSE_API_KEY, OPNSENSE_API_PORT
+)
 
 
 def get_db_connection():
@@ -41,6 +45,14 @@ def get_radcheck_users():
             username = row[0]
             if username in users:
                 users[username]["groups"].append({"groupname": row[1], "priority": row[2]})
+        
+        # Add DHCP reservations from OPNsense
+        for username in users:
+            dhcp_info = get_opnsense_dhcp_reservation(username)
+            if dhcp_info:
+                users[username]["dhcp_reservation"] = dhcp_info
+            else:
+                users[username]["dhcp_reservation"] = None
         
         return list(users.values())
     except mariadb.Error as e:
@@ -262,3 +274,36 @@ def delete_group(groupname):
     finally:
         if conn:
             conn.close()
+
+
+def get_opnsense_dhcp_reservation(mac_address):
+    """Get KEA DHCP reservation from OPNsense API for a MAC address."""
+    if not OPNSENSE_HOST or not OPNSENSE_API_KEY:
+        return None
+    
+    try:
+        url = f"{OPNSENSE_HOST}:{OPNSENSE_API_PORT}/api/kea/dhcp4/reservations/get"
+        headers = {
+            "Authorization": f"Bearer {OPNSENSE_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        params = {
+            "hw-address": mac_address
+        }
+        
+        response = requests.get(url, headers=headers, params=params, verify=False, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data and "reservations" in data and len(data["reservations"]) > 0:
+                reservation = data["reservations"][0]
+                return {
+                    "ip_address": reservation.get("ip-address", ""),
+                    "hostname": reservation.get("hostname", ""),
+                    "client_classes": reservation.get("client-classes", [])
+                }
+        
+        return None
+    except Exception as e:
+        print(f"Error fetching OPNsense DHCP reservation: {e}", file=sys.stderr)
+        return None
