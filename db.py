@@ -26,14 +26,15 @@ def get_radcheck_users():
         return []
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT username, attribute, op, value FROM radcheck")
+        cursor.execute("SELECT username, attribute, op, value, description FROM radcheck")
         users = {}
         for row in cursor.fetchall():
             username = row[0]
             if username not in users:
                 users[username] = {"username": username, "checks": [], "groups": []}
-            # Standard radcheck doesn't have description, so we use attribute as description
-            users[username]["checks"].append({"attribute": row[1], "op": row[2], "value": row[3], "description": row[1]})
+            # Use description from radcheck if available
+            description = row[4] if len(row) > 4 and row[4] is not None else row[1]
+            users[username]["checks"].append({"attribute": row[1], "op": row[2], "value": row[3], "description": description})
         
         cursor.execute("SELECT username, groupname, priority FROM radusergroup")
         for row in cursor.fetchall():
