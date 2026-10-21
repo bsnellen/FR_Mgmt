@@ -5,111 +5,274 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Management</title>
     <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .form-row { margin: 5px 0; }
-        .form-row input, .form-row select { padding: 5px; }
-        .edit-form { background: #fff; padding: 10px; border: 1px solid #ddd; margin: 10px 0; display: none; }
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #f8f9fa;
+            --border: #dee2e6;
+            --text: #212529;
+            --text-light: #6c757d;
+            --white: #ffffff;
+            --danger: #dc3545;
+            --success: #28a745;
+            --radius: 4px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: var(--text);
+            line-height: 1.5;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        h1, h2, h3, h4 {
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+        
+        h1 { font-size: 28px; margin-bottom: 20px; }
+        h2 { font-size: 22px; margin: 25px 0 15px; }
+        h3 { font-size: 18px; margin-bottom: 10px; }
+        h4 { font-size: 16px; margin: 15px 0 10px; }
+        
+        .btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-danger {
+            background: var(--danger);
+        }
+        .btn-danger:hover { background: #c82333; }
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: #e2e6ea; }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--secondary);
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tr:hover { background: #f8f9fa; }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .form-row input,
+        .form-row select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+        }
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .edit-form {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--white);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
         .edit-form.active { display: block; }
-        .group-section { margin-bottom: 20px; border: 1px solid #eee; padding: 10px; }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        
+        .group-section {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .nav-link {
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .nav-link .btn {
+            background: var(--secondary);
+            color: var(--text);
+        }
+        
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .group-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
-    <h1>Group Management</h1>
-    
-    <p><a href="/">Back to Users</a></p>
-    
-    <h2>Create New Group</h2>
-    <form method="POST" action="/groups/create">
-        <div class="form-row">
-            <input type="text" name="groupname" placeholder="Group Name" required>
-            <input type="text" name="attribute" placeholder="Attribute" required>
-            <select name="op" required>
-                <option value="=">=</option>
-                <option value=":=">:=</option>
-                <option value="==">==</option>
-            </select>
-            <input type="text" name="value" placeholder="Value" required>
-            <button type="submit">Create</button>
+    <div class="container">
+        <h1>Group Management</h1>
+        
+        <div class="nav-link">
+            <a href="/"><button class="btn btn-secondary">Back to Users</button></a>
         </div>
-    </form>
+        
+        <div class="card">
+            <h2>Create New Group</h2>
+            <form method="POST" action="/groups/create">
+                <div class="form-row">
+                    <input type="text" name="groupname" placeholder="Group Name" required>
+                    <input type="text" name="attribute" placeholder="Attribute" required>
+                    <select name="op" required>
+                        <option value="=">=</option>
+                        <option value=":=">:=</option>
+                        <option value="==">==</option>
+                    </select>
+                    <input type="text" name="value" placeholder="Value" required>
+                    <button type="submit" class="btn">Create</button>
+                </div>
+            </form>
+        </div>
 
-    <div id="editForm" class="edit-form">
-        <h3>Edit Group Attribute</h3>
-        <form method="POST" action="/groups/update">
-            <input type="hidden" name="old_groupname" id="old_groupname">
-            <input type="hidden" name="old_attribute" id="old_attribute">
-            <div class="form-row">
-                <input type="text" name="groupname" id="edit_groupname" placeholder="Group Name" required>
-                <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
-                <select name="op" id="edit_op" required>
-                    <option value="=">=</option>
-                    <option value=":=">:=</option>
-                    <option value="==">==</option>
-                </select>
-                <input type="text" name="value" id="edit_value" placeholder="Value" required>
-                <button type="submit">Update</button>
-                <button type="button" onclick="hideEditForm()">Cancel</button>
+        <div id="editForm" class="edit-form">
+            <h3>Edit Group Attribute</h3>
+            <form method="POST" action="/groups/update">
+                <input type="hidden" name="old_groupname" id="old_groupname">
+                <input type="hidden" name="old_attribute" id="old_attribute">
+                <div class="form-row">
+                    <input type="text" name="groupname" id="edit_groupname" placeholder="Group Name" required>
+                    <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
+                    <select name="op" id="edit_op" required>
+                        <option value="=">=</option>
+                        <option value=":=">:=</option>
+                        <option value="==">==</option>
+                    </select>
+                    <input type="text" name="value" id="edit_value" placeholder="Value" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Cancel</button>
+                    <button type="submit" class="btn">Update</button>
+                </div>
+            </form>
+        </div>
+
+        <h2>Groups</h2>
+        {% for group in groups %}
+        <div class="group-section">
+            <h3>{{ group.groupname }}</h3>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Op</th>
+                            <th>Value</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attr in group.attributes %}
+                        <tr>
+                            <td>{{ attr.attribute }}</td>
+                            <td>{{ attr.op }}</td>
+                            <td>{{ attr.value }}</td>
+                            <td>
+                                <button class="btn btn-secondary btn-sm edit-btn" 
+                                        data-groupname="{{ group.groupname }}"
+                                        data-attribute="{{ attr.attribute }}"
+                                        data-op="{{ attr.op }}"
+                                        data-value="{{ attr.value }}">
+                                    Edit
+                                </button>
+                                <form method="POST" action="/groups/delete_attr" style="display: inline;">
+                                    <input type="hidden" name="groupname" value="{{ group.groupname }}">
+                                    <input type="hidden" name="attribute" value="{{ attr.attribute }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <form method="POST" action="/groups/add_attr" style="margin-top: 15px; display: flex; gap: 10px;">
+                    <input type="hidden" name="groupname" value="{{ group.groupname }}">
+                    <input type="text" name="attribute" placeholder="Attribute" required style="flex: 1;">
+                    <select name="op" required>
+                        <option value="=">=</option>
+                        <option value=":=">:=</option>
+                        <option value="==">==</option>
+                    </select>
+                    <input type="text" name="value" placeholder="Value" required style="flex: 1;">
+                    <button type="submit" class="btn btn-sm">Add Attribute</button>
+                </form>
+                <form method="POST" action="/groups/delete" style="margin-top: 10px;">
+                    <input type="hidden" name="groupname" value="{{ group.groupname }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete Group</button>
+                </form>
             </div>
-        </form>
+        </div>
+        {% endfor %}
     </div>
-
-    <h2>Groups</h2>
-    {% for group in groups %}
-    <div class="group-section">
-        <h3>{{ group.groupname }}</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Attribute</th>
-                    <th>Op</th>
-                    <th>Value</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for attr in group.attributes %}
-                <tr>
-                    <td>{{ attr.attribute }}</td>
-                    <td>{{ attr.op }}</td>
-                    <td>{{ attr.value }}</td>
-                    <td>
-                        <button class="edit-btn" 
-                                data-groupname="{{ group.groupname }}"
-                                data-attribute="{{ attr.attribute }}"
-                                data-op="{{ attr.op }}"
-                                data-value="{{ attr.value }}">
-                            Edit
-                        </button>
-                        <form method="POST" action="/groups/delete_attr" style="display: inline;">
-                            <input type="hidden" name="groupname" value="{{ group.groupname }}">
-                            <input type="hidden" name="attribute" value="{{ attr.attribute }}">
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <form method="POST" action="/groups/add_attr" style="margin-top: 10px;">
-            <input type="hidden" name="groupname" value="{{ group.groupname }}">
-            <input type="text" name="attribute" placeholder="Attribute" required>
-            <select name="op" required>
-                <option value="=">=</option>
-                <option value=":=">:=</option>
-                <option value="==">==</option>
-            </select>
-            <input type="text" name="value" placeholder="Value" required>
-            <button type="submit">Add Attribute</button>
-        </form>
-        <form method="POST" action="/groups/delete" style="margin-top: 10px;">
-            <input type="hidden" name="groupname" value="{{ group.groupname }}">
-            <button type="submit">Delete Group</button>
-        </form>
-    </div>
-    {% endfor %}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

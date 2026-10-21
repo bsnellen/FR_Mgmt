@@ -5,101 +5,275 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device Management</title>
     <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .form-row { margin: 5px 0; }
-        .form-row input, .form-row select { padding: 5px; }
-        .edit-form { background: #fff; padding: 10px; border: 1px solid #ddd; margin: 10px 0; display: none; }
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #f8f9fa;
+            --border: #dee2e6;
+            --text: #212529;
+            --text-light: #6c757d;
+            --white: #ffffff;
+            --danger: #dc3545;
+            --success: #28a745;
+            --radius: 4px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: var(--text);
+            line-height: 1.5;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        h1, h2, h3, h4 {
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+        
+        h1 { font-size: 28px; margin-bottom: 20px; }
+        h2 { font-size: 22px; margin: 25px 0 15px; }
+        h3 { font-size: 18px; margin-bottom: 10px; }
+        h4 { font-size: 16px; margin: 15px 0 10px; }
+        
+        .btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-danger {
+            background: var(--danger);
+        }
+        .btn-danger:hover { background: #c82333; }
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: #e2e6ea; }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--secondary);
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tr:hover { background: #f8f9fa; }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .form-row input,
+        .form-row select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+        }
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .edit-form {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--white);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
         .edit-form.active { display: block; }
-        .group-badge { background: #e0e0e0; padding: 2px 6px; border-radius: 3px; margin: 2px; display: inline-block; }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        
+        .group-badge {
+            background: var(--primary);
+            color: var(--white);
+            padding: 3px 8px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        .nav-link {
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .group-item:last-child { border-bottom: none; }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+        }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body>
-    <h1>Device Management</h1>
-    
-    <p><a href="/groups"><button>Manage Groups</button></a></p>
-    
-    <h2>Add User</h2>
-    <form method="POST" action="/update">
-        <div class="form-row">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="text" name="attribute" placeholder="Attribute" required>
-            <select name="op" required>
-                <option value="=">=</option>
-                <option value=":=">:=</option>
-                <option value="==">==</option>
-            </select>
-            <input type="text" name="value" placeholder="Value" required>
-            <button type="submit">Save</button>
+    <div class="container">
+        <h1>Device Management</h1>
+        
+        <div class="nav-link">
+            <a href="/groups"><button class="btn">Manage Groups</button></a>
         </div>
-    </form>
+        
+        <div class="card">
+            <h2>Add User</h2>
+            <form method="POST" action="/update">
+                <div class="form-row">
+                    <input type="text" name="username" placeholder="Username" required>
+                    <input type="text" name="attribute" placeholder="Attribute" required>
+                    <select name="op" required>
+                        <option value="=">=</option>
+                        <option value=":=">:=</option>
+                        <option value="==">==</option>
+                    </select>
+                    <input type="text" name="value" placeholder="Value" required>
+                    <button type="submit" class="btn">Save</button>
+                </div>
+            </form>
+        </div>
 
-    <div id="editForm" class="edit-form">
-        <h3>Edit User</h3>
-        <form method="POST" action="/update">
-            <input type="hidden" name="old_username" id="old_username">
-            <input type="hidden" name="old_attribute" id="old_attribute">
-            <div class="form-row">
-                <input type="text" name="username" id="edit_username" placeholder="Username" required>
-                <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
-                <select name="op" id="edit_op" required>
-                    <option value="=">=</option>
-                    <option value=":=">:=</option>
-                    <option value="==">==</option>
-                </select>
-                <input type="text" name="value" id="edit_value" placeholder="Value" required>
-                <button type="submit">Update</button>
-                <button type="button" onclick="hideEditForm()">Cancel</button>
-            </div>
-        </form>
-        <div id="editGroups" style="margin-top: 10px;"></div>
-    </div>
+        <div class="overlay" id="overlay"></div>
+        <div id="editForm" class="edit-form">
+            <h3>Edit User</h3>
+            <form method="POST" action="/update">
+                <input type="hidden" name="old_username" id="old_username">
+                <input type="hidden" name="old_attribute" id="old_attribute">
+                <div class="form-row">
+                    <input type="text" name="username" id="edit_username" placeholder="Username" required>
+                    <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
+                    <select name="op" id="edit_op" required>
+                        <option value="=">=</option>
+                        <option value=":=">:=</option>
+                        <option value="==">==</option>
+                    </select>
+                    <input type="text" name="value" id="edit_value" placeholder="Value" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Cancel</button>
+                    <button type="submit" class="btn">Update</button>
+                </div>
+            </form>
+            <div id="editGroups" style="margin-top: 15px;"></div>
+        </div>
 
-    <h2>Users</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Attribute</th>
-                <th>Op</th>
-                <th>Value</th>
-                <th>Groups</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.checks[0].attribute if user.checks else '' }}</td>
-                <td>{{ user.checks[0].op if user.checks else '' }}</td>
-                <td>{{ user.checks[0].value if user.checks else '' }}</td>
-                <td>
-                    {% for group in user.groups %}
-                    <span class="group-badge">{{ group.groupname }}</span>
+        <div class="card">
+            <h2>Users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Attribute</th>
+                        <th>Op</th>
+                        <th>Value</th>
+                        <th>Groups</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.checks[0].attribute if user.checks else '' }}</td>
+                        <td>{{ user.checks[0].op if user.checks else '' }}</td>
+                        <td>{{ user.checks[0].value if user.checks else '' }}</td>
+                        <td>
+                            {% for group in user.groups %}
+                            <span class="group-badge">{{ group.groupname }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm edit-btn" 
+                                    data-username="{{ user.username }}"
+                                    data-attribute="{{ user.checks[0].attribute if user.checks else '' }}"
+                                    data-op="{{ user.checks[0].op if user.checks else '' }}"
+                                    data-value="{{ user.checks[0].value if user.checks else '' }}"
+                                    data-groups='{{ user.groups | tojson }}'>
+                                Edit
+                            </button>
+                            <form method="POST" action="/delete" style="display: inline;">
+                                <input type="hidden" name="username" value="{{ user.username }}">
+                                <input type="hidden" name="attribute" value="{{ user.checks[0].attribute if user.checks else '' }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
                     {% endfor %}
-                </td>
-                <td>
-                    <button class="edit-btn" 
-                            data-username="{{ user.username }}"
-                            data-attribute="{{ user.checks[0].attribute if user.checks else '' }}"
-                            data-op="{{ user.checks[0].op if user.checks else '' }}"
-                            data-value="{{ user.checks[0].value if user.checks else '' }}"
-                            data-groups='{{ user.groups | tojson }}'>
-                        Edit
-                    </button>
-                    <form method="POST" action="/delete" style="display: inline;">
-                        <input type="hidden" name="username" value="{{ user.username }}">
-                        <input type="hidden" name="attribute" value="{{ user.checks[0].attribute if user.checks else '' }}">
-                        <button type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
         const allGroups = {{ groups | tojson }};
@@ -121,11 +295,12 @@
                     const groupForm = document.createElement('form');
                     groupForm.method = 'POST';
                     groupForm.action = '/add_group';
-                    groupForm.style.margin = '5px 0';
+                    groupForm.style.margin = '10px 0';
                     
                     const groupSelect = document.createElement('select');
                     groupSelect.name = 'groupname';
                     groupSelect.required = true;
+                    groupSelect.style.flex = '1';
                     allGroups.forEach(g => {
                         const option = document.createElement('option');
                         option.value = g.groupname;
@@ -138,30 +313,32 @@
                     `;
                     groupForm.appendChild(groupSelect);
                     groupForm.innerHTML += `
-                        <input type="number" name="priority" placeholder="Priority" value="0">
-                        <button type="submit">Add Group</button>
+                        <input type="number" name="priority" placeholder="Priority" value="0" style="flex: 1;">
+                        <button type="submit" class="btn btn-sm">Add Group</button>
                     `;
                     editGroupsDiv.appendChild(groupForm);
                     
                     groups.forEach(group => {
                         const groupDiv = document.createElement('div');
-                        groupDiv.style.margin = '5px 0';
+                        groupDiv.className = 'group-item';
                         groupDiv.innerHTML = `
-                            ${group.groupname} (Priority: ${group.priority})
+                            <span><strong>${group.groupname}</strong> (Priority: ${group.priority})</span>
                             <form method="POST" action="/delete_group" style="display: inline;">
                                 <input type="hidden" name="username" value="${this.dataset.username}">
                                 <input type="hidden" name="groupname" value="${group.groupname}">
-                                <button type="submit">Remove</button>
+                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                             </form>
                         `;
                         editGroupsDiv.appendChild(groupDiv);
                     });
                     
+                    document.getElementById('overlay').classList.add('active');
                     document.getElementById('editForm').classList.add('active');
                 });
             });
         });
         function hideEditForm() {
+            document.getElementById('overlay').classList.remove('active');
             document.getElementById('editForm').classList.remove('active');
         }
     </script>
