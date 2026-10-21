@@ -190,6 +190,34 @@
             margin-left: 4px;
         }
         .unhide-btn:hover { text-decoration: underline; }
+        
+        .form-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -224,16 +252,31 @@
             <form method="POST" action="/update">
                 <input type="hidden" name="old_username" id="old_username">
                 <input type="hidden" name="old_attribute" id="old_attribute">
-                <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
                     <input type="text" name="username" id="edit_username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Attribute</label>
                     <input type="text" name="attribute" id="edit_attribute" placeholder="Attribute" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
                     <input type="text" name="description" id="edit_description" placeholder="Description">
-                    <select name="op" id="edit_op" required>
-                        <option value="=">=</option>
-                        <option value=":=">:=</option>
-                        <option value="==">==</option>
-                    </select>
-                    <input type="text" name="value" id="edit_value" placeholder="Value" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1; min-width: 100px;">
+                        <label class="form-label">Operator</label>
+                        <select name="op" id="edit_op" required>
+                            <option value="=">=</option>
+                            <option value=":=">:=</option>
+                            <option value="==">==</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 2; min-width: 150px;">
+                        <label class="form-label">Value</label>
+                        <input type="text" name="value" id="edit_value" placeholder="Value" required>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Cancel</button>
