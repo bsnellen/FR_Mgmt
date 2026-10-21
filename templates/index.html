@@ -224,6 +224,46 @@
             color: var(--text-light);
             font-style: italic;
         }
+        
+        .filter-section {
+            display: none;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: var(--white);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        .filter-section.active { display: block; }
+        
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .toggle-filter-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+        }
+        .toggle-filter-btn:hover { text-decoration: underline; }
+        
+        .user-row { display: table-row; }
+        .user-row.hidden { display: none; }
     </style>
 </head>
 <body>
@@ -294,6 +334,20 @@
 
         <div class="card">
             <h2>Users</h2>
+            
+            <button class="toggle-filter-btn" onclick="toggleFilter()">
+                <span id="filterIcon">🔍</span> Filter Users
+            </button>
+            
+            <div class="filter-section" id="filterSection">
+                <div class="filter-row">
+                    <input type="text" id="filterUsername" class="filter-input" placeholder="Filter by username...">
+                    <input type="text" id="filterDescription" class="filter-input" placeholder="Filter by description...">
+                    <button class="btn btn-sm" onclick="applyFilter()">Apply</button>
+                    <button class="btn btn-secondary btn-sm" onclick="clearFilter()">Clear</button>
+                </div>
+            </div>
+            
             <table>
                 <thead>
                     <tr>
@@ -309,7 +363,7 @@
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr>
+                    <tr class="user-row">
                         <td>{{ user.username }}</td>
                         <td>{{ user.checks[0].attribute if user.checks else '' }}</td>
                         <td>{{ user.checks[0].description if user.checks else '' }}</td>
@@ -367,6 +421,47 @@
                 hiddenSpan.textContent = '';
                 button.textContent = 'Show';
             }
+        }
+        
+        function toggleFilter() {
+            const filterSection = document.getElementById('filterSection');
+            const filterIcon = document.getElementById('filterIcon');
+            
+            if (filterSection.classList.contains('active')) {
+                filterSection.classList.remove('active');
+                filterIcon.textContent = '🔍';
+            } else {
+                filterSection.classList.add('active');
+                filterIcon.textContent = '❌';
+            }
+        }
+        
+        function applyFilter() {
+            const usernameFilter = document.getElementById('filterUsername').value.toLowerCase();
+            const descriptionFilter = document.getElementById('filterDescription').value.toLowerCase();
+            
+            document.querySelectorAll('.user-row').forEach(row => {
+                const username = row.cells[0].textContent.toLowerCase();
+                const description = row.cells[2].textContent.toLowerCase();
+                
+                const usernameMatch = !usernameFilter || username.includes(usernameFilter);
+                const descriptionMatch = !descriptionFilter || description.includes(descriptionFilter);
+                
+                if (usernameMatch && descriptionMatch) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+        
+        function clearFilter() {
+            document.getElementById('filterUsername').value = '';
+            document.getElementById('filterDescription').value = '';
+            document.querySelectorAll('.user-row').forEach(row => {
+                row.classList.remove('hidden');
+            });
+            applyFilter();
         }
         
         document.addEventListener('DOMContentLoaded', function() {
