@@ -32,7 +32,8 @@ def get_radcheck_users():
             username = row[0]
             if username not in users:
                 users[username] = {"username": username, "checks": [], "groups": []}
-            users[username]["checks"].append({"attribute": row[1], "op": row[2], "value": row[3]})
+            # Standard radcheck doesn't have description, so we use attribute as description
+            users[username]["checks"].append({"attribute": row[1], "op": row[2], "value": row[3], "description": row[1]})
         
         cursor.execute("SELECT username, groupname, priority FROM radusergroup")
         for row in cursor.fetchall():

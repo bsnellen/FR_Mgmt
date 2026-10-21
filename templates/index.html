@@ -179,7 +179,7 @@
         .overlay.active { display: block; }
         
         .value-hidden { color: transparent; user-select: none; }
-        .value-hidden::after { content: '••••••••'; color: var(--text-light); }
+        .value-hidden::after { content: '\2022\2022\2022\2022\2022\2022\2022\2022'; color: var(--text-light); }
         .unhide-btn {
             background: none;
             border: none;
@@ -248,6 +248,7 @@
                     <tr>
                         <th>Username</th>
                         <th>Attribute</th>
+                        <th>Description</th>
                         <th>Op</th>
                         <th>Value</th>
                         <th>Groups</th>
@@ -259,6 +260,7 @@
                     <tr>
                         <td>{{ user.username }}</td>
                         <td>{{ user.checks[0].attribute if user.checks else '' }}</td>
+                        <td>{{ user.checks[0].description if user.checks else '' }}</td>
                         <td>{{ user.checks[0].op if user.checks else '' }}</td>
                         <td>
                             <span class="value-hidden" data-value="{{ user.checks[0].value if user.checks else '' }}"></span>
