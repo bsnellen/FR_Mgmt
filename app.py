@@ -118,12 +118,16 @@ def delete_group_entry():
 
 @app.route("/add_dhcp_reservation", methods=["POST"])
 def add_dhcp_reservation():
+    from db import normalize_mac_address, is_mac_address
+    
     username = request.form.get("username")
     ip_address = request.form.get("ip_address")
     hostname = request.form.get("hostname", "")
     groupname = request.form.get("groupname", "")
     
     if username and ip_address:
+        mac_address = username if is_mac_address(username) else username
+        
         vlan_number = None
         if groupname:
             vlan_number = get_group_vlan_number(groupname)
@@ -134,15 +138,17 @@ def add_dhcp_reservation():
                 ip_parts[2] = str(vlan_number)
                 ip_address = '.'.join(ip_parts)
         
-        create_opnsense_dhcp_reservation(username, ip_address, hostname)
+        create_opnsense_dhcp_reservation(mac_address, ip_address, hostname)
     return redirect(url_for("index"))
 
 
 @app.route("/delete_dhcp_reservation", methods=["POST"])
 def delete_dhcp_reservation():
+    from db import normalize_mac_address, is_mac_address
     username = request.form.get("username")
+    mac_address = username if is_mac_address(username) else username
     if username:
-        delete_opnsense_dhcp_reservation(username)
+        delete_opnsense_dhcp_reservation(mac_address)
     return redirect(url_for("index"))
 
 

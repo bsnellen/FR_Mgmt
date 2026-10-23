@@ -1,10 +1,48 @@
 import mariadb
 import sys
 import requests
+import re
 from config import (
     DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME,
     OPNSENSE_HOST, OPNSENSE_API_KEY, OPNSENSE_API_PORT
 )
+
+
+def normalize_mac_address(mac):
+    """Normalize MAC address to 00:00:00:00:00:00 format."""
+    if not mac:
+        return None
+    
+    mac = mac.strip().lower()
+    
+    if re.match(r'^[0-9a-f]{12}$', mac):
+        return ':'.join([mac[i:i+2] for i in range(0, 12, 2)])
+    elif re.match(r'^[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}$', mac):
+        return mac.replace('.', ':')
+    elif re.match(r'^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}$', mac):
+        return mac
+    elif re.match(r'^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$', mac):
+        parts = mac.split('.')
+        return ':'.join([p[:2] + ':' + p[2:] for p in parts])
+    
+    return None
+
+
+def is_mac_address(text):
+    """Check if text is a MAC address in any common format."""
+    if not text:
+        return False
+    
+    text = text.strip().lower()
+    
+    patterns = [
+        r'^[0-9a-f]{12}$',
+        r'^[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}\.[0-9a-f]{2}$',
+        r'^[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}$',
+        r'^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$',
+    ]
+    
+    return any(re.match(pattern, text) for pattern in patterns)
 
 
 def get_db_connection():
@@ -278,9 +316,14 @@ def delete_group(groupname):
 
 def get_opnsense_dhcp_reservation(mac_address):
     """Get KEA DHCP reservation from OPNsense API for a MAC address."""
+
     if not OPNSENSE_HOST or not OPNSENSE_API_KEY:
         return None
     
+    normalized_mac = normalize_mac_address(mac_address)
+    if not normalized_mac:
+        return None
+
     try:
         url = f"{OPNSENSE_HOST}:{OPNSENSE_API_PORT}/api/kea/dhcp4/reservations/get"
         headers = {
@@ -288,7 +331,7 @@ def get_opnsense_dhcp_reservation(mac_address):
             "Content-Type": "application/json"
         }
         params = {
-            "hw-address": mac_address
+            "hw-address": normalized_mac
         }
         
         response = requests.get(url, headers=headers, params=params, verify=False, timeout=10)
@@ -314,6 +357,10 @@ def create_opnsense_dhcp_reservation(mac_address, ip_address, hostname=None, sub
     if not OPNSENSE_HOST or not OPNSENSE_API_KEY:
         return False
     
+    normalized_mac = normalize_mac_address(mac_address)
+    if not normalized_mac:
+        return False
+    
     try:
         url = f"{OPNSENSE_HOST}:{OPNSENSE_API_PORT}/api/kea/dhcp4/reservations/add"
         headers = {
@@ -323,7 +370,7 @@ def create_opnsense_dhcp_reservation(mac_address, ip_address, hostname=None, sub
         
         payload = {
             "reservation": {
-                "hw-address": mac_address,
+                "hw-address": normalized_mac,
                 "ip-address": ip_address
             }
         }
@@ -351,6 +398,10 @@ def delete_opnsense_dhcp_reservation(mac_address):
     if not OPNSENSE_HOST or not OPNSENSE_API_KEY:
         return False
     
+    normalized_mac = normalize_mac_address(mac_address)
+    if not normalized_mac:
+        return False
+    
     try:
         url = f"{OPNSENSE_HOST}:{OPNSENSE_API_PORT}/api/kea/dhcp4/reservations/del"
         headers = {
@@ -360,7 +411,7 @@ def delete_opnsense_dhcp_reservation(mac_address):
         
         payload = {
             "reservation": {
-                "hw-address": mac_address
+                "hw-address": normalized_mac
             }
         }
         
