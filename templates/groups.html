@@ -256,13 +256,13 @@
                 </table>
                 <form method="POST" action="/groups/add_attr" style="margin-top: 15px; display: flex; gap: 10px;">
                     <input type="hidden" name="groupname" value="{{ group.groupname }}">
-                    <input type="text" name="attribute" placeholder="Attribute" required style="flex: 1;">
+                    <input type="text" name="attribute" placeholder="Attribute (e.g., VLAN)" required style="flex: 1;">
                     <select name="op" required>
                         <option value="=">=</option>
                         <option value=":=">:=</option>
                         <option value="==">==</option>
                     </select>
-                    <input type="text" name="value" placeholder="Value" required style="flex: 1;">
+                    <input type="text" name="value" placeholder="Value (e.g., VLAN number for 3rd IP byte)" required style="flex: 1;">
                     <button type="submit" class="btn btn-sm">Add Attribute</button>
                 </form>
                 <form method="POST" action="/groups/delete" style="margin-top: 10px;">

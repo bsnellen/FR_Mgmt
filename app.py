@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for
 from db import (
     get_radcheck_users, update_radcheck_user, delete_radcheck_user,
     add_radusergroup_membership, delete_radusergroup_membership,
-    get_groups, get_group, update_group_attribute, delete_group_attribute, delete_group
+    get_groups, get_group, update_group_attribute, delete_group_attribute, delete_group,
+    create_opnsense_dhcp_reservation, delete_opnsense_dhcp_reservation, get_group_vlan_number
 )
 
 app = Flask(__name__)
@@ -113,6 +114,36 @@ def delete_group_entry():
     if groupname:
         delete_group(groupname)
     return redirect(url_for("groups"))
+
+
+@app.route("/add_dhcp_reservation", methods=["POST"])
+def add_dhcp_reservation():
+    username = request.form.get("username")
+    ip_address = request.form.get("ip_address")
+    hostname = request.form.get("hostname", "")
+    groupname = request.form.get("groupname", "")
+    
+    if username and ip_address:
+        vlan_number = None
+        if groupname:
+            vlan_number = get_group_vlan_number(groupname)
+        
+        if vlan_number is not None:
+            ip_parts = ip_address.split('.')
+            if len(ip_parts) == 4:
+                ip_parts[2] = str(vlan_number)
+                ip_address = '.'.join(ip_parts)
+        
+        create_opnsense_dhcp_reservation(username, ip_address, hostname)
+    return redirect(url_for("index"))
+
+
+@app.route("/delete_dhcp_reservation", methods=["POST"])
+def delete_dhcp_reservation():
+    username = request.form.get("username")
+    if username:
+        delete_opnsense_dhcp_reservation(username)
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":

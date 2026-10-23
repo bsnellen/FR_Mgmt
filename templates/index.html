@@ -285,22 +285,42 @@
             <a href="/groups"><button class="btn">Manage Groups</button></a>
         </div>
         
-        <div class="card">
-            <h2>Add User</h2>
-            <form method="POST" action="/update">
-                <div class="form-row">
-                    <input type="text" name="username" placeholder="Username" required>
-                    <input type="text" name="attribute" placeholder="Attribute" required>
-                    <input type="text" name="description" placeholder="Description">
-                    <select name="op" required>
-                        <option value="=">=</option>
-                        <option value=":=">:=</option>
-                        <option value="==">==</option>
-                    </select>
-                    <input type="text" name="value" placeholder="Value" required>
-                    <button type="submit" class="btn">Save</button>
-                </div>
-            </form>
+        <button class="toggle-filter-btn" onclick="toggleAddUser()">
+            <span id="addUserIcon">+</span> Add User
+        </button>
+        
+        <div class="filter-section" id="addUserSection">
+            <div class="card">
+                <h2>Add User</h2>
+                <form method="POST" action="/update">
+                    <div class="form-row">
+                        <input type="text" name="username" placeholder="Username" required>
+                        <input type="text" name="attribute" placeholder="Attribute" required>
+                        <input type="text" name="description" placeholder="Description">
+                        <select name="op" required>
+                            <option value="=">=</option>
+                            <option value=":=">:=</option>
+                            <option value="==">==</option>
+                        </select>
+                        <input type="text" name="value" placeholder="Value" required>
+                        <button type="submit" class="btn">Save</button>
+                    </div>
+                </form>
+                <form method="POST" action="/add_dhcp_reservation" style="margin-top: 15px;">
+                    <div class="form-row">
+                        <input type="text" name="username" placeholder="MAC Address" required>
+                        <input type="text" name="ip_address" placeholder="IP Address (e.g., 192.168.X.100)" required>
+                        <input type="text" name="hostname" placeholder="Hostname">
+                        <select name="groupname">
+                            <option value="">No Group (Manual IP)</option>
+                            {% for group in groups %}
+                            <option value="{{ group.groupname }}">{{ group.groupname }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn">Add DHCP Reservation</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="overlay" id="overlay"></div>
@@ -408,6 +428,25 @@
                                 <input type="hidden" name="attribute" value="{{ user.checks[0].attribute if user.checks else '' }}">
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
+                            {% if user.dhcp_reservation %}
+                            <form method="POST" action="/delete_dhcp_reservation" style="display: inline;">
+                                <input type="hidden" name="username" value="{{ user.username }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete DHCP</button>
+                            </form>
+                            {% else %}
+                            <form method="POST" action="/add_dhcp_reservation" style="display: inline;">
+                                <input type="hidden" name="username" value="{{ user.username }}">
+                                <input type="text" name="ip_address" placeholder="IP" required style="width: 100px; padding: 2px 4px; font-size: 11px;">
+                                <input type="text" name="hostname" placeholder="Host" style="width: 80px; padding: 2px 4px; font-size: 11px;">
+                                <select name="groupname" style="padding: 2px 4px; font-size: 11px;">
+                                    <option value="">VLAN</option>
+                                    {% for g in groups %}
+                                    <option value="{{ g.groupname }}">{{ g.groupname }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm" style="padding: 2px 6px; font-size: 11px;">Add DHCP</button>
+                            </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -442,6 +481,19 @@
             } else {
                 filterSection.classList.add('active');
                 filterIcon.textContent = '\U0000274C';
+            }
+        }
+        
+        function toggleAddUser() {
+            const addUserSection = document.getElementById('addUserSection');
+            const addUserIcon = document.getElementById('addUserIcon');
+            
+            if (addUserSection.classList.contains('active')) {
+                addUserSection.classList.remove('active');
+                addUserIcon.textContent = '+';
+            } else {
+                addUserSection.classList.add('active');
+                addUserIcon.textContent = '\U0000274C';
             }
         }
         

@@ -307,3 +307,90 @@ def get_opnsense_dhcp_reservation(mac_address):
     except Exception as e:
         print(f"Error fetching OPNsense DHCP reservation: {e}", file=sys.stderr)
         return None
+
+
+def create_opnsense_dhcp_reservation(mac_address, ip_address, hostname=None, subnet_id=None):
+    """Create a KEA DHCP reservation on OPNsense API."""
+    if not OPNSENSE_HOST or not OPNSENSE_API_KEY:
+        return False
+    
+    try:
+        url = f"{OPNSENSE_HOST}:{OPNSENSE_API_PORT}/api/kea/dhcp4/reservations/add"
+        headers = {
+            "Authorization": f"Bearer {OPNSENSE_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "reservation": {
+                "hw-address": mac_address,
+                "ip-address": ip_address
+            }
+        }
+        
+        if hostname:
+            payload["reservation"]["hostname"] = hostname
+        
+        if subnet_id:
+            payload["reservation"]["subnet-id"] = subnet_id
+        
+        response = requests.post(url, headers=headers, json=payload, verify=False, timeout=10)
+        
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"Error creating DHCP reservation: {response.status_code} - {response.text}", file=sys.stderr)
+            return False
+    except Exception as e:
+        print(f"Error creating OPNsense DHCP reservation: {e}", file=sys.stderr)
+        return False
+
+
+def delete_opnsense_dhcp_reservation(mac_address):
+    """Delete a KEA DHCP reservation from OPNsense API."""
+    if not OPNSENSE_HOST or not OPNSENSE_API_KEY:
+        return False
+    
+    try:
+        url = f"{OPNSENSE_HOST}:{OPNSENSE_API_PORT}/api/kea/dhcp4/reservations/del"
+        headers = {
+            "Authorization": f"Bearer {OPNSENSE_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "reservation": {
+                "hw-address": mac_address
+            }
+        }
+        
+        response = requests.post(url, headers=headers, json=payload, verify=False, timeout=10)
+        
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"Error deleting DHCP reservation: {response.status_code} - {response.text}", file=sys.stderr)
+            return False
+    except Exception as e:
+        print(f"Error deleting OPNsense DHCP reservation: {e}", file=sys.stderr)
+        return False
+
+
+def get_group_vlan_number(groupname):
+    """Extract VLAN number from group attributes in radgroupreply table."""
+    conn = get_db_connection()
+    if not conn:
+        return None
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT value FROM radgroupreply WHERE groupname = ? AND attribute = 'VLAN'", (groupname,))
+        row = cursor.fetchone()
+        if row and row[0]:
+            return int(row[0])
+        return None
+    except mariadb.Error as e:
+        print(f"Error fetching VLAN for group {groupname}: {e}", file=sys.stderr)
+        return None
+    finally:
+        if conn:
+            conn.close()
